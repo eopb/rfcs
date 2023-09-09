@@ -3,15 +3,14 @@
 - RFC PR: [rust-lang/rfcs#0000](https://github.com/rust-lang/rfcs/pull/0000)
 - Rust Issue: [rust-lang/rust#0000](https://github.com/rust-lang/rust/issues/0000)
 
+https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/Semver.20compatible.20pre-release.20versions.20.28maybe.20pre-RFC.29
+
 # Language
 
 root crate: the crate whos cargo lock is currently being used to select dependency versions
 
 # Summary
 [summary]: #summary
-
-One paragraph explanation of the feature.
-
 
 This RFC proposes extending `cargo update` to allow updates to pre-release versions when requested with `--precise`.
 For example a `cargo` user would be able to call `cargo update -p dep --precise 0.1.1-pre0` as long as the version of `dep` requested by their project and its dependenies is semver compatible with `0.1.1`.
@@ -20,8 +19,6 @@ This effectively splits the notion of compatibility in `cargo` where a version i
 
 # Motivation
 [motivation]: #motivation
-
-Why are we doing this? What use cases does it support? What is the expected outcome?
 
 Pre-release crates are currenlty challenging to use in large projects with complex dependacy trees.
 For example, if a maintainer releases `dep = "0.1.1-pre0"`.
@@ -34,6 +31,46 @@ The user is left with no upgrade path to the pre-release unless they are able to
 
 Explain the proposal as if it was already included in the language and you were teaching it to another Rust programmer. That generally means:
 
+`cargo-update` does not update dependencies to new pre-release versions.
+
+This is becuase that when Cargo considers `Cargo.toml` requirments for dependacies it always favours selecting stable versions over pre-release versions.
+When the specified requirment is itself a pre-release version, that version is considered pinned and Cargo will always select that version.
+
+If a user does want to select a pre-release version they are able to do so by explicity requesting Cargo to update to that version.
+This is done by passing the `--precise` flag to Cargo.
+Cargo will refuses to select pre-release versions that are "incompatible" with the requirment in the projects `Cargo.toml`.
+A pre-release version is considered compatible for a precise upgrade if its major, minor and patch versions, ignoring its pre-release version, is compatible with the requirment.
+For example, `x.y.z-pre0` is considered compatible with `a.b.c` if `x.y.z` is semver compatible with `a.b.c` when requested `--precise`ly.
+
+With a `Cargo.toml` with this `[dependencies]` section
+
+```
+[dependencies]
+example = "1.0.0"
+  
+```
+
+It is possible to update to `1.2.0-pre0` because `1.2.0` is semver compatible with `1.0.0`
+
+```
+> cargo update -p example --precise 1.2.0-pre0
+    Updating crates.io index
+    Updating example v1.0.0 -> v1.2.0-pre0
+```
+
+It is not possible to update to `2.0.0-pre0` because `2.0.0` is semver compatible with `1.0.0`
+
+```
+> cargo update -p example --precise 2.0.0-pre0
+    Updating crates.io index
+error: failed to select a version for the requirement `example = "^1"`
+candidate versions found which didn't match: 2.0.0-pre0
+location searched: crates.io index
+required by package `tmp-oyyzsf v0.1.0 (/home/ethan/.cache/cargo-temp/tmp-OYyZsF)`
+```
+
+
+
 - Introducing new named concepts.
 - Explaining the feature largely in terms of examples.
 - Explaining how Rust programmers should *think* about the feature, and how it should impact the way they use Rust. It should explain the impact as concretely as possible.
@@ -41,10 +78,11 @@ Explain the proposal as if it was already included in the language and you were 
 - If applicable, describe the differences between teaching this to existing Rust programmers and new Rust programmers.
 - Discuss how this impacts the ability to read, understand, and maintain Rust code. Code is read and modified far more often than written; will the proposed feature make code easier to maintain?
 
-For implementation-oriented RFCs (e.g. for compiler internals), this section should focus on how compiler contributors should think about the change, and give examples of its concrete impact. For policy RFCs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
+
+Cargo updating off of a prereeleas happens only if the toml request is for a non prereeleas. Requesting a pre release in the toml will effectively pin cargo update
 
 This is the technical portion of the RFC. Explain the design in sufficient detail that:
 
@@ -59,8 +97,20 @@ The section should return to the examples given in the previous section, and exp
 
 Why should we *not* do this?
 
+Not easily auditibale as reviewers ofthen dont check the content of cargo lock ( was have a policy at work to avoid pre releases in the production environment but this wouldn't be caught)
+ - Maybe this could be reduced by producing a warning when pre-releases are being used
+
+No min versions
+
+App -> pre1 -> pre2
+App -> pre2
+It's impossible to express that pre1 depends on pre2 via Cargo lock as dependacy cargo locks are ignored
+So we shouldn't recommend pretag precise upgrades on libraries 
+
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
+
+Embrase that pre-releases arn't very usable and discorage there use.
 
 - Why is this design the best in the space of possible designs?
 - What other designs have been considered and what is the rationale for not choosing them?
@@ -95,6 +145,10 @@ Please also take into consideration that rust sometimes intentionally diverges f
 
 # Future possibilities
 [future-possibilities]: #future-possibilities
+
+Channels of compatible pre versions `beta.1` `beta.2`
+
+Resolving pre release versions in `Cargo.toml`
 
 Think about what the natural extension and evolution of your proposal would
 be and how it would affect the language and project as a whole in a holistic
