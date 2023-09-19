@@ -133,7 +133,7 @@ example
 └── b ^0.1.0
 ```
 
-Since crates ignore the lock files of their dependacies there is no way for `a` to comunicate with `example` that it requires features from `b = 0.1.1-pre0` without breaking `example`s direct dependacy on `b`.
+Since crates ignore the lock files of their dependencies there is no way for `a` to communicate with `example` that it requires features from `b = 0.1.1-pre0` without breaking `example`'s direct dependency on `b`.
 To enable this we could extend the use of the concept of compatible pre-releases to work in `Cargo.toml`.
-This would require that pre-releases are specified with `=` and would allow pre-release versions to be requested anywhere within the dependacy tree without causing the resolver to thow an error.
+This would require that pre-releases are specified with `=` and would allow pre-release versions to be requested anywhere within the dependency tree without causing the resolver to throw an error.
 
