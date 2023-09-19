@@ -122,6 +122,6 @@ pre-release versions to new pre-releases when one is released.
 [future-possibilities]: #future-possibilities
 
 It would be nice if dependencies could specify their requirements for pre-release versions.
-Since a library crates `Cargo.lock` is ignored when used as a dependancy, these versions must be part of the `Cargo.toml`.
+Since a library crates `Cargo.lock` is ignored when used as a dependency, these versions must be part of the `Cargo.toml`.
 These versions could be required to be specified with `=` and considered incompatible with other pre-release versions.
 
