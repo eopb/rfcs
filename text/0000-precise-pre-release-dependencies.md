@@ -10,7 +10,6 @@ For example a `cargo` user would be able to call `cargo update -p dep --precise 
 This effectively splits the notion of compatibility in `cargo`.
 A pre-release version may considered compatible when `--precise`ly stated but will not be updated to automaticly via a basic `cargo update`.
 
-
 # Motivation
 [motivation]: #motivation
 
