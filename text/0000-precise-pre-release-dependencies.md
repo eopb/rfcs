@@ -123,6 +123,17 @@ pre-release versions to new pre-releases when one is released.
 [future-possibilities]: #future-possibilities
 
 It would be nice if dependencies could specify their requirements for pre-release versions.
-Since a library crates `Cargo.lock` is ignored when used as a dependency, these versions must be part of the `Cargo.toml`.
-These versions could be required to be specified with `=` and considered incompatible with other pre-release versions.
+
+Take for example this dependency tree.
+
+```
+example
+├── a ^0.1.0
+│   └── b =0.1.1-pre0
+└── b ^0.1.0
+```
+
+Since crates ignore the lock files of their dependacies there is no way for `a` to comunicate with `example` that it requires features from `b = 0.1.1-pre0` without breaking `example`s direct dependacy on `b`.
+To enable this we could extend the use of the concept of compatible pre-releases to work in `Cargo.toml`.
+This would require that pre-releases are specified with `=` and would allow pre-release versions to be requested anywhere within the dependacy tree without causing the resolver to thow an error.
 
