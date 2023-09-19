@@ -29,7 +29,7 @@ Cargo is unable to resolve a project with a `Cargo.toml` specification for a pre
 If a user does want to select a pre-release version they are able to do so by explicitly requesting Cargo to update to that version.
 This is done by passing the `--precise` flag to Cargo.
 Cargo will refuse to select pre-release versions that are "incompatible" with the requirement in the projects `Cargo.toml`.
-A pre-release version is considered compatible for a precise upgrade if its major, minor and patch versions, ignoring its pre-release version, are compatible with the requirement.
+A pre-release version is considered compatible for a precise upgrade if its major, minor, and patch versions are compatible with the requirement, ignoring its pre-release version.
 `x.y.z-pre0` is considered compatible with `a.b.c` when requested `--precise`ly if `x.y.z` is semver compatible with `a.b.c` and `a.b.c` `!=` `x.y.z`.
 
 Consider a `Cargo.toml` with this `[dependencies]` section
