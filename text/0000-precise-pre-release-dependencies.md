@@ -8,7 +8,8 @@
 This RFC proposes extending `cargo update` to allow updates to pre-release versions when requested with `--precise`.
 For example, a `cargo` user would be able to call `cargo update -p dep --precise 0.1.1-pre0` as long as the version of `dep` requested by their project and its dependencies are semver compatible with `0.1.1`.
 This effectively splits the notion of compatibility in `cargo`.
-A pre-release version may considered compatible when `--precise`ly stated but will not be updated to automatically via a basic `cargo update`.
+A pre-release version may be considered compatible when the version is explicitly requested with `--precise`.
+Cargo will not automatically select that version via a basic `cargo update`.
 
 # Motivation
 [motivation]: #motivation
