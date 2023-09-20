@@ -25,7 +25,7 @@ The user is left with no upgrade path to the pre-release unless they are able to
 
 When Cargo considers `Cargo.toml` requirements for dependencies it always favours selecting stable versions over pre-release versions.
 When the specification is itself a pre-release version, Cargo will always select a pre-release.
-Cargo is unable to resolve a project with a `Cargo.toml` specification for a pre-release version if any of its dependencies specify a stable release.
+Cargo is unable to resolve a project with a `Cargo.toml` specification for a pre-release version if any of its dependencies request a stable release.
 
 If a user does want to select a pre-release version they are able to do so by explicitly requesting Cargo to update to that version.
 This is done by passing the `--precise` flag to Cargo.
@@ -85,7 +85,7 @@ Consider this table where `a.b.c` is compatible with `x.y.z` and `x.y.z > a.b.c`
 
 ❌: Will not upgrade
 
-¹For backwards compatibility with Cargo's current behaviour
+¹For backwards compatibility with Cargo's current behaviour (see [RFC: Precise Pre-release Deps](https://github.com/rust-lang/rfcs/pull/3263))
 
 ²Emits a warning
 
@@ -94,7 +94,7 @@ Consider this table where `a.b.c` is compatible with `x.y.z` and `x.y.z > a.b.c`
 
 - Pre-release versions are not easily auditable when they are only specified in the lock file.
   A change that makes use of a pre-release version may not be noticed during code review as reviewers don't always check for changes in the lock file.
-- Library crates that require a pre-release version are not well supported (see [future-possibilities])
+- Library crates that require a pre-release version are not well supported since their lock files are ignored by their users (see [future-possibilities])
 
 # Rationale and alternatives
 [rationale-and-alternatives]: #rationale-and-alternatives
@@ -105,15 +105,15 @@ These provide a similar experience to pre-releases, however, they require that t
 This can cause issues particularly in CI where jobs may have permission to fetch from a private registry but not from private git repositories.
 Resolving issues around not being able to fetch pre-releases from the registry usually wastes a significant amount of time.
 
-Another alternative would be to resolve pre-release versions in `Cargo.toml`s even when a dependency specifies a stable version.
+Another alternative would be to resolve pre-release versions in `Cargo.toml`s even when another dependency specifies a stable version.
 This is explored in [future-possibilities].
 This would require significant changes to the resolver since the latest compatible version would depend on the versions required by other parts of the dependency tree.
-For that reason, I consider detailing such a change outside of the scope of this RFC.
+This RFC may be a stepping stone in that direction since it lays the groundwork for pre-release compatibility rules, however, I consider detailing such a change outside of the scope of this RFC.
 
 # Prior art
 [prior-art]: #prior-art
 
-[RFC: Precise Pre-release Deps](https://github.com/rust-lang/rfcs/pull/3263) aims to solve a similar but subtly different issue where `cargo update` opts to upgrade 
+[RFC: Precise Pre-release Deps](https://github.com/rust-lang/rfcs/pull/3263) aims to solve a similar but different issue where `cargo update` opts to upgrade 
 pre-release versions to new pre-releases when one is released.
 
 # Unresolved questions
@@ -134,6 +134,6 @@ example
 ```
 
 Since crates ignore the lock files of their dependencies there is no way for `a` to communicate with `example` that it requires features from `b = 0.1.1-pre0` without breaking `example`'s direct dependency on `b`.
-To enable this we could extend the use of the concept of compatible pre-releases to work in `Cargo.toml`.
+To enable this we could use the same concept of compatible pre-releases in `Cargo.toml`, not just `Cargo.lock`.
 This would require that pre-releases are specified with `=` and would allow pre-release versions to be requested anywhere within the dependency tree without causing the resolver to throw an error.
 
